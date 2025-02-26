@@ -1,0 +1,19 @@
+{
+  "name": "socknet",
+  "version": "1.0.0",
+  "description": "SockNet soc. media",
+  "main": "index.js",
+  "scripts": {
+    "seed": "node ./seeder/index.js"
+  },
+  "keywords": [
+    "social",
+    "media",
+    "SockNet"
+  ],
+  "author": "Jonas Petrikas (https://github.com/Jonas-Petrikas)",
+  "license": "ISC",
+  "dependencies": {
+    "@faker-js/faker": "^9.5.0"
+  }
+}
