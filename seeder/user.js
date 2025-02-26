@@ -3,6 +3,15 @@ import { faker } from '@faker-js/faker';
 export function createUser() {
     return {
 
+        name: faker.internet.userName(),
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        role: faker.helpers.arrayElement(['user', 'admin', 'gold', 'bot']),
+        avatar: null,
+        created_at: faker.date.recent(),
+        status: faker.helpers.arrayElement(['banned', 'verified', 'registered']),
+        online: faker.number.int({ min: 0, max: 1 }),
+
     };
 }
 
