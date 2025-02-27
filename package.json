@@ -1,5 +1,6 @@
 {
   "name": "socknet",
+  "type": "module",
   "version": "1.0.0",
   "description": "SockNet soc. media",
   "main": "index.js",
@@ -14,6 +15,8 @@
   "author": "Jonas Petrikas (https://github.com/Jonas-Petrikas)",
   "license": "ISC",
   "dependencies": {
-    "@faker-js/faker": "^9.5.0"
+    "@faker-js/faker": "^9.5.0",
+    "md5": "^2.3.0",
+    "mysql": "^2.18.1"
   }
 }

@@ -1,18 +1,20 @@
 import { faker } from '@faker-js/faker';
+import md5 from 'md5';
+
 
 export function createUser() {
-    return {
+  return {
 
-        name: faker.internet.userName(),
-        email: faker.internet.email(),
-        password: faker.internet.password(),
-        role: faker.helpers.arrayElement(['user', 'admin', 'gold', 'bot']),
-        avatar: null,
-        created_at: faker.date.recent(),
-        status: faker.helpers.arrayElement(['banned', 'verified', 'registered']),
-        online: faker.number.int({ min: 0, max: 1 }),
+    name: faker.internet.username(),
+    email: faker.internet.email(),
+    password: md5('123'),
+    role: faker.helpers.arrayElement(['user', 'admin', 'gold', 'bot']),
+    avatar: faker.image.avatar(),
+    created_at: faker.date.recent(),
+    status: faker.helpers.arrayElement(['banned', 'verified', 'registered']),
+    online: faker.number.int({ min: 0, max: 1 }),
 
-    };
+  };
 }
 
 //users
