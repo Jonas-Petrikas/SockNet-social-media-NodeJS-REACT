@@ -1,11 +1,15 @@
 console.log('start seeding');
 import { faker } from '@faker-js/faker';
+
 import { createUser } from './user.js';
 import { createPost } from './post.js';
-import mysql from 'mysql';
-import { makeLikes } from './functions.js'
+import { makeLikes, makeMessagesUsers } from './functions.js';
+import { createImage } from './image.js';
+import { createMessage } from './message.js';
 
-const usersCount = 10;
+import mysql from 'mysql';
+
+const usersCount = 100;
 const postsCount = 50;
 
 console.log(makeLikes(usersCount));
@@ -24,10 +28,59 @@ const users = faker.helpers.multiple(createUser, {
 const posts = faker.helpers.multiple(createPost, {
     count: postsCount,
 });
+const images = [];
+const messages = [];
 
-posts.forEach(p => {
+users.forEach((_, key) => {
+    const toUserId = key + 1;
+    const fromUsers = makeMessagesUsers(toUserId, usersCount);
+
+    fromUsers.forEach(fromUserId => {
+        if (!messages.some(msg => {
+            (msg.toUserId === toUserId && msg.fromUserId === fromUserId)
+                ||
+                (msg.toUserId === fromUserId && msg.fromUserId === toUserId)
+        })
+        ) {
+            const endTime = faker.date.recent({ days: 5 });
+            const replies = faker.number.int({ min: 1, max: 50 });
+            let seenTo = true;
+            let seenFrom = !faker.number.int({ min: 0, max: 1 });
+            const seen = [];
+            seenTo && seen.push(toUserId);
+            seenFrom && seen.push(fromUserId);
+            // d1.setMinutes(d1.getMinutes() - 879);
+            messages.push({
+                ...createMessage(),
+                toUserId,
+                fromUserId,
+                seen,
+                created_at: endTime
+            });
+
+            for (let i = 0; i < replies; i++) {
+                //
+            }
+        }
+    });
+});
+
+posts.forEach((p, key) => {
     p.user_id = faker.number.int({ min: 1, max: usersCount });
     p.votes = JSON.stringify(makeLikes(usersCount));
+
+    //add images
+    const imagesCount = faker.number.int({ min: 1, max: 5 });
+
+    for (let i = 0; i < imagesCount; i++) {
+        images.push({
+            ...createImage(),
+            post_id: key + 1,
+            main: !i ? 1 : 0
+
+        })
+
+    }
 })
 
 
@@ -47,6 +100,16 @@ con.connect(function (err) {
 });
 
 let sql;
+
+sql = 'DROP TABLE IF EXISTS images ;'
+
+con.query(sql, (err) => {
+    if (err) {
+        console.log('Images drop error', err)
+    } else {
+        console.log('Images table dropped')
+    }
+});
 
 sql = 'DROP TABLE IF EXISTS posts ;'
 
@@ -83,7 +146,7 @@ CREATE TABLE users (
 `
 con.query(sql, (err) => {
     if (err) {
-        console.log('table create error')
+        console.log('table create error', err)
     } else {
         console.log('table created')
     }
@@ -103,11 +166,43 @@ CREATE TABLE posts (
 
 con.query(sql, (err) => {
     if (err) {
-        console.log('Posts table create error')
+        console.log('Posts table create error', err)
     } else {
         console.log('posts created')
     }
+});
+
+sql = `
+CREATE TABLE images (
+    id int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    url varchar(100) NOT NULL,
+    post_id int(10) UNSIGNED NOT NULL,
+    main tinyint(3) UNSIGNED NOT NULL DEFAULT 0
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+`;
+
+con.query(sql, (err) => {
+    if (err) {
+        console.log('Images table create error', err)
+    } else {
+        console.log('Images table created')
+    }
+});
+
+sql = `
+INSERT INTO images
+(url, post_id, main)
+VALUES ?
+`;
+con.query(sql, [images.map(image => [image.url, image.post_id, image.main])], (err) => {
+    if (err) {
+        console.log('image table seed error')
+    } else {
+        console.log('image table seeded')
+    }
 })
+
+
 
 sql = `
 INSERT INTO users
