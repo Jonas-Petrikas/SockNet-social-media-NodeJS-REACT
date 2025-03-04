@@ -6,10 +6,11 @@ import { createPost } from './post.js';
 import { makeLikes, makeMessagesUsers } from './functions.js';
 import { createImage } from './image.js';
 import { createMessage } from './message.js';
+import { createComment } from './comment.js';
 
 import mysql from 'mysql';
 
-const usersCount = 100;
+const usersCount = 30;
 const postsCount = 50;
 
 console.log(makeLikes(usersCount));
@@ -30,6 +31,7 @@ const posts = faker.helpers.multiple(createPost, {
 });
 const images = [];
 const messages = [];
+const comments = [];
 
 users.forEach((_, key) => {
     const toUserId = key + 1;
@@ -42,13 +44,9 @@ users.forEach((_, key) => {
                 (msg.toUserId === fromUserId && msg.fromUserId === toUserId)
         })
         ) {
-            const endTime = faker.date.recent({ days: 5 });
+            let endTime = faker.date.recent({ days: 5 });
             const replies = faker.number.int({ min: 1, max: 50 });
-            let seenTo = true;
-            let seenFrom = !faker.number.int({ min: 0, max: 1 });
-            const seen = [];
-            seenTo && seen.push(toUserId);
-            seenFrom && seen.push(fromUserId);
+            let seen = false;
             // d1.setMinutes(d1.getMinutes() - 879);
             messages.push({
                 ...createMessage(),
@@ -57,13 +55,40 @@ users.forEach((_, key) => {
                 seen,
                 created_at: endTime
             });
-
+            let sameUserReply = 0;
+            let owner = 'to';
             for (let i = 0; i < replies; i++) {
-                //
+                if (sameUserReply === 0) {
+                    sameUserReply = faker.number.int({ min: 1, max: 10 });
+                    sameUserReply > 6 && (sameUserReply = 1);
+                    owner = owner === 'to' ? 'from' : 'to';
+                }
+
+                if (!seen) {
+                    seen = owner === 'from' ? !faker.number.int({ min: 0, max: 1 }) : true;
+                }
+
+
+                endTime = endTime.setMinutes(endTime.getMinutes() - faker.number.int({ min: 1, max: 100 }));
+
+                endTime = new Date(endTime);
+
+
+                messages.push({
+                    ...createMessage(),
+                    toUserId: owner === 'to' ? toUserId : fromUserId,
+                    fromUserId: owner === 'to' ? fromUserId : toUserId,
+                    seen,
+                    created_at: endTime
+                });
+
+                sameUserReply--;
+
             }
         }
     });
 });
+
 
 posts.forEach((p, key) => {
     p.user_id = faker.number.int({ min: 1, max: usersCount });
@@ -78,7 +103,23 @@ posts.forEach((p, key) => {
             post_id: key + 1,
             main: !i ? 1 : 0
 
+        });
+    }
+    //add comments
+    let commentTime = p.created_at;
+    const commentsCount = faker.number.int({ min: 0, max: 30 });
+    for (let i = 0; i < commentsCount; i++) {
+        commentTime = commentTime.setMinutes(commentTime.getMinutes() - faker.number.int({ min: 1, max: 100 }))
+        commentTime = new Date(commentTime);
+
+        comments.push({
+            ...createComment(),
+            postId: key + 1,
+            userId: faker.number.int({ min: 0, max: usersCount }),
+            created_at: commentTime
+
         })
+
 
     }
 })
@@ -100,6 +141,36 @@ con.connect(function (err) {
 });
 
 let sql;
+
+sql = 'DROP TABLE IF EXISTS sessions ;'
+
+con.query(sql, (err) => {
+    if (err) {
+        console.log('sessions drop error', err)
+    } else {
+        console.log('sessions table dropped')
+    }
+});
+
+sql = 'DROP TABLE IF EXISTS comments ;'
+
+con.query(sql, (err) => {
+    if (err) {
+        console.log('Comments drop error', err)
+    } else {
+        console.log('Comments table dropped')
+    }
+});
+
+sql = 'DROP TABLE IF EXISTS messages ;'
+
+con.query(sql, (err) => {
+    if (err) {
+        console.log('Messages drop error', err)
+    } else {
+        console.log('Messages table dropped')
+    }
+});
 
 sql = 'DROP TABLE IF EXISTS images ;'
 
@@ -190,6 +261,64 @@ con.query(sql, (err) => {
 });
 
 sql = `
+CREATE TABLE messages (
+    id int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    from_user_id int(10) UNSIGNED NOT NULL,
+    to_user_id int(11) UNSIGNED NOT NULL,
+    content text NOT NULL,
+    created_at date NOT NULL DEFAULT current_timestamp(),
+    seen text NOT NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+`;
+
+con.query(sql, (err) => {
+    if (err) {
+        console.log('Messages table create error', err)
+    } else {
+        console.log('Messages table created')
+    }
+});
+
+sql = `CREATE TABLE comments (
+  id int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  user_id int(10) UNSIGNED DEFAULT NULL,
+  post_id int(10) UNSIGNED NOT NULL,
+  content text NOT NULL,
+  created_at date NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+`;
+
+con.query(sql, (err) => {
+    if (err) {
+        console.log('Comments table create error', err)
+    } else {
+        console.log('Comments table created')
+    }
+});
+
+sql = `
+CREATE TABLE sessions (
+  id int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  user_id int(10) UNSIGNED NOT NULL,
+  token char(32) NOT NULL,
+  valid_until date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+`
+
+
+con.query(sql, (err) => {
+    if (err) {
+        console.log('Sessions table create error', err)
+    } else {
+        console.log('Sessions table created')
+    }
+});
+
+
+
+sql = `
 INSERT INTO images
 (url, post_id, main)
 VALUES ?
@@ -230,6 +359,36 @@ con.query(sql, [posts.map(post => [post.content, post.created_at, post.updated_a
         console.log('posts table seeded')
     }
 })
+
+sql = `
+INSERT INTO messages
+(from_user_id, to_user_id, content, created_at, seen)
+VALUES ?
+`;
+
+con.query(sql, [messages.map(message => [message.fromUserId, message.toUserId, message.content, message.created_at, message.seen])], (err) => {
+    if (err) {
+        console.log('Messages table seed error', err)
+    } else {
+        console.log('Messages table seeded')
+    }
+})
+
+sql = `
+INSERT INTO comments
+(post_id, user_id, content, created_at)
+VALUES ?
+`;
+
+con.query(sql, [comments.map(comment => [comment.postId, comment.userId, comment.content, comment.created_at])], (err) => {
+    if (err) {
+        console.log('Comments table seed error', err)
+    } else {
+        console.log('Comments table seeded')
+    }
+})
+
+
 
 
 con.end(); // atjungia 
