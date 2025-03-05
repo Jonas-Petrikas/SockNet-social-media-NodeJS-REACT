@@ -115,7 +115,7 @@ posts.forEach((p, key) => {
         comments.push({
             ...createComment(),
             postId: key + 1,
-            userId: faker.number.int({ min: 0, max: usersCount }),
+            userId: faker.number.int({ min: 1, max: usersCount }),
             created_at: commentTime
 
         })
@@ -264,7 +264,7 @@ sql = `
 CREATE TABLE messages (
     id int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     from_user_id int(10) UNSIGNED NOT NULL,
-    to_user_id int(11) UNSIGNED NOT NULL,
+    to_user_id int(10) UNSIGNED NOT NULL,
     content text NOT NULL,
     created_at date NOT NULL DEFAULT current_timestamp(),
     seen text NOT NULL
@@ -388,7 +388,74 @@ con.query(sql, [comments.map(comment => [comment.postId, comment.userId, comment
     }
 })
 
+sql = `
+ALTER TABLE comments
+  ADD CONSTRAINT comments_ibfk_1 FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE,
+ADD CONSTRAINT comments_ibfk_2 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL;
+  `
 
+
+con.query(sql, (err) => {
+    if (err) {
+        console.log('Comments table alter error', err)
+    } else {
+        console.log('Comments table alter success')
+    }
+});
+
+
+sql = `
+ALTER TABLE images
+  ADD CONSTRAINT images_ibfk_1 FOREIGN KEY (post_id) REFERENCES posts (id);
+  `
+
+con.query(sql, (err) => {
+    if (err) {
+        console.log('Images table alter error', err)
+    } else {
+        console.log('Images table alter success')
+    }
+});
+
+
+sql = `ALTER TABLE messages
+  ADD CONSTRAINT messages_ibfk_1 FOREIGN KEY (from_user_id) REFERENCES users (id) ON DELETE CASCADE,
+  ADD CONSTRAINT messages_ibfk_2 FOREIGN KEY (to_user_id) REFERENCES users (id) ON DELETE CASCADE;
+  `
+
+con.query(sql, (err) => {
+    if (err) {
+        console.log('Messages table alter error', err)
+    } else {
+        console.log('Messages table alter success')
+    }
+});
+
+
+sql = ` ALTER TABLE posts
+  ADD CONSTRAINT posts_ibfk_1 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL;
+`
+
+con.query(sql, (err) => {
+    if (err) {
+        console.log('Posts table alter error', err)
+    } else {
+        console.log('Posts table alter success')
+    }
+});
+
+
+sql = `
+ALTER TABLE sessions
+  ADD CONSTRAINT sessions_ibfk_1 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE;`
+
+con.query(sql, (err) => {
+    if (err) {
+        console.log('Sessions table alter error', err)
+    } else {
+        console.log('Sessions table alter success')
+    }
+});
 
 
 con.end(); // atjungia 
