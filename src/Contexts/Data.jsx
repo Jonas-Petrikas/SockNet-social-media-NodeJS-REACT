@@ -1,14 +1,18 @@
-import { createContext } from "react";
+import { createContext } from 'react';
+import useUsers from '../Hooks/useUsers';
 
 const Data = createContext();
 
 export const DataProvider = ({ children }) => {
 
-    const dalykas = 'dalykas';
+    const { users, dispatchUsers } = useUsers();
+
+    console.log(users)
+
 
     return (
         <Data.Provider value={{
-            dalykas
+            users, dispatchUsers
 
         }}>
             {children}

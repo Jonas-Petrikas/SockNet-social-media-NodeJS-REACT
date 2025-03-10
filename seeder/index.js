@@ -10,7 +10,7 @@ import { createComment } from './comment.js';
 
 import mysql from 'mysql';
 
-const usersCount = 30;
+const usersCount = 100;
 const postsCount = 50;
 
 console.log(makeLikes(usersCount));
