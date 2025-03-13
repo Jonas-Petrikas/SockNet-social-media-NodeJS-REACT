@@ -166,9 +166,10 @@ app.post('/logout', (req, res) => {
 app.get('/users/active-list', (req, res) => {
 
     const sql = `
-    SELECT id, name, avatar
+    SELECT id, name, avatar, role, online
     FROM users
-    WHERE online = 1
+    WHERE role <> 'bot'
+    ORDER BY online DESC, name
     `;
     con.query(sql, (err, result) => {
         if (err) return error500(res, err);

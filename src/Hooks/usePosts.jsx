@@ -12,7 +12,7 @@ export default function usePosts() {
     useEffect(_ => {
         axios.get(C.SERVER_URL + 'posts/load-posts/1')
             .then(res => {
-                console.log(res.data.db) //iš serverio gauti post duomenys
+                // console.log(res.data.db) //iš serverio gauti post duomenys
                 //action yra objektas
                 dispatchPosts({
                     type: A.LOAD_POSTS_FROM_SERVER, //tipas - ką daryti

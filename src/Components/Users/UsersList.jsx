@@ -5,7 +5,7 @@ import UserInList from "./UserInList";
 export default function UsersList() {
 
     const { users } = useContext(Data); //users yra steitas
-    console.log(users);
+    // console.log(users);
     if (users === null) {
         return (
             <div className="bin bin-30">
@@ -19,7 +19,7 @@ export default function UsersList() {
 
     return (
         <div className="bin bin-30">
-            <h1>Sock-Net prisijungę - ({users.length}):</h1>
+            <h1>Sock-Net vartotojai:</h1>
             <ul className="users-list">
                 {
                     users.map(u => <UserInList key={u.id} user={u} />)
