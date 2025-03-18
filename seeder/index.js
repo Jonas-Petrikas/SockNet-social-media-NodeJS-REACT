@@ -302,7 +302,7 @@ CREATE TABLE sessions (
   id int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   user_id int(10) UNSIGNED NOT NULL,
   token char(32) NOT NULL,
-  valid_until date NOT NULL
+  valid_until DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 `
