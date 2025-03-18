@@ -168,9 +168,12 @@ app.get('/users/active-list', (req, res) => {
     const sql = `
     SELECT id, name, avatar, role, online
     FROM users
-    WHERE role <> 'bot'
+    -- WHERE role <> 'bot'
     ORDER BY online DESC, name
     `;
+
+    //  
+    //   WHERE role = 'gold'
     con.query(sql, (err, result) => {
         if (err) return error500(res, err);
         res.json({

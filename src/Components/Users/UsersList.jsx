@@ -22,7 +22,10 @@ export default function UsersList() {
             <h1>Sock-Net vartotojai:</h1>
             <ul className="users-list">
                 {
-                    users.map(u => <UserInList key={u.id} user={u} />)
+                    users.map(u => u.role !== 'bot' ? <UserInList key={u.id} user={u} /> : null)
+                }
+                {
+                    users.map(u => u.role === 'bot' ? <UserInList key={u.id} user={u} /> : null)
                 }
 
             </ul>
