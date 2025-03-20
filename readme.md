@@ -2,7 +2,7 @@
 # SockNet - Social Media platform on Node.js
 Simple SPA Social Media platform with posts, comments, chat and user roles.  MySQL database and Node.js on the back and React with Vite on the front.
 
-## DB architecture: [Doctor Care](https://jonas-petrikas.github.io/Doctor-care-WEB-HTML/)
+## DB architecture:
 
 ![App Screenshot](./screenshots/Screenshot%202025-03-19%20at%2010.49.49.png)
 
