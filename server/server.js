@@ -39,6 +39,13 @@ con.connect(err => {
 });
 
 const error500 = (res, err) => res.status(500).json(err);
+const error400 = (res, customCode = 0) => res.status(400).json({
+    msg: { type: 'error', text: 'invalid request. Code' + customCode }
+});
+
+const error401 = (res, message) => res.status(401).json({
+    msg: { type: 'error', text: message }
+});
 
 //Identifikacija - pagal numatytą ID identifikuojam vartotoją pvz Ragana-su-šluota
 //Autorizacija - pagal vartotojo identifikuotą ID, vartotojui suteikiamos teisės - gali balsuoti, pirkti, keisti, etc.
@@ -86,9 +93,7 @@ app.post('/login', (req, res) => {
     con.query(sql, [name, md5(password)], (err, result) => {
         if (err) return error500(res, err);
         if (result.length === 0) {
-            res.status(401).send({
-                msg: { type: 'error', text: 'Invalid username or password' }
-            });
+            error401(res, 'invalid username or password');
             return;
         }
         const token = md5(v4());
@@ -124,45 +129,27 @@ app.post('/login', (req, res) => {
 //TODO paimti iš middleware
 app.get('/auth-user', (req, res) => {
     setTimeout(_ => {
-        const token = req.cookies['r2-token'] || 'no-token';
-        const sql = 'SELECT * FROM users WHERE session_id = ?';
-        con.query(sql, [token], (err, result) => {
-            if (err) {
-                res.status(500).send('Klaida bandant prisijungti');
-                return;
-            }
-            if (result.length === 0) {
-                res.status(200).json({
-                    role: 'guest',
-                    name: 'Guest',
-                    id: 0
-                });
-                return;
-            }
-            res.status(200).json({
-                role: result[0].role,
-                name: result[0].name,
-                id: result[0].id
-            });
-        });
+        res.json(req.user);
     }, 1000);
 });
 
 
 app.post('/logout', (req, res) => {
     setTimeout(_ => {
-        const token = req.cookies['r2-token'] || 'no-token';
-        console.log('logout', token);
-        const sql = 'UPDATE users SET session_id = ? WHERE session_id = ?';
-        con.query(sql, [null, token], (err) => {
+        const token = req.cookies['sock-net-token'] || 'no-token';
+
+        const sql = `
+        DELETE FROM sessions
+        WHERE token = ?
+        `
+        con.query(sql, [token], (err) => {
             if (err) {
                 res.status(500).send('Klaida bandant atsijungti');
                 return;
-            }
-            res.clearCookie('r2-token');
+            } //patrumpint
+            res.clearCookie('sock-net-token');
             res.status(200).json({
-                success: true,
-                message: 'Atsijungimas sėkmingas',
+                msg: { type: 'success', text: 'bye bye' },
                 user: {
                     role: 'guest',
                     name: 'Guest',
@@ -227,7 +214,28 @@ app.get('/posts/load-posts/:page', (req, res) => {
     });
 });
 
+app.post('/post/update/:id', (req, res) => {
+    if (!req.user.id) {
+        error401(res, 'Please login first.');
+        return;
+    }
+    const id = parseInt(req.params.id);
+    const { type, payload } = req.body;
 
+    const sql1 = 'SELECT * FROM posts WHERE id = ?';
+
+    con.query(sql1, [id], (err, result1) => {
+        if (err) return error500(res, err);
+        if (!result1.length) return error400(res, 554); //554 random code number with no meaning
+        if ('up_vote' === type) {
+
+        }
+
+    });
+
+
+
+});
 
 // Start server
 

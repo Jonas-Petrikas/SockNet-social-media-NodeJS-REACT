@@ -10,7 +10,7 @@ import { faker } from '@faker-js/faker';
 export function createImage() {
 
     return {
-        url: faker.image.url(),
+        url: faker.image.urlPicsumPhotos(),
     };
 }
 

@@ -17,6 +17,21 @@ export function createUser() {
   };
 }
 
+export function createSome(name, role) {
+  return {
+
+    name: name,
+    email: name + 'gmail.com',
+    password: md5('123'),
+    role: role,
+    avatar: faker.image.avatar(),
+    created_at: faker.date.recent(),
+    status: 'verified',
+    online: 1,
+
+  };
+}
+
 //users
 /*
 CREATE TABLE `users` (

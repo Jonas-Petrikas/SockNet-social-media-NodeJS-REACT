@@ -7,8 +7,10 @@ import Nav from './Components/Nav';
 import Body from './Components/Body';
 import Page404 from './Pages/404';
 import Login from './Pages/Login';
+import Logout from './Pages/Logout';
 import { DataProvider } from './Contexts/Data';
 import { AuthProvider } from './Contexts/Auth';
+
 
 function App() {
 
@@ -22,6 +24,7 @@ function App() {
             <Route index element={<Home />} />
             <Route path='chat' element={<Chat />} />
             <Route path='login' element={<Login />} />
+            <Route path='logout' element={<Logout />} />
             <Route path='*' element={<Page404 />} />
 
             labas

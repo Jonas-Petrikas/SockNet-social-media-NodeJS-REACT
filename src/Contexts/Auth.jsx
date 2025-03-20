@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
 
     const [user, setUser] = useState(null);
 
-    const { getUser, responseOkUser } = useAuth();
+    const { getUser } = useAuth(setUser);
 
 
 
@@ -15,13 +15,6 @@ export const AuthProvider = ({ children }) => {
         getUser();
     }, []);
 
-
-    useEffect(_ => {
-        if (responseOkUser === null) {
-            return;
-        }
-
-    }, [responseOkUser])
 
     return (
         <Auth.Provider value={{

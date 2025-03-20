@@ -7,7 +7,7 @@ const Data = createContext();
 export const DataProvider = ({ children }) => {
 
     const { users, dispatchUsers } = useUsers();
-    const { posts, dispatchPosts } = usePosts();
+    const { posts, dispatchPosts, setPostUpdate } = usePosts();
 
     console.log(users)
 
@@ -15,7 +15,7 @@ export const DataProvider = ({ children }) => {
     return (
         <Data.Provider value={{
             users, dispatchUsers,
-            posts, dispatchPosts
+            posts, dispatchPosts, setPostUpdate
 
         }}>
             {children}
