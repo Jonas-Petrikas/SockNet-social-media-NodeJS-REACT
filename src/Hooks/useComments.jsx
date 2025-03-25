@@ -22,6 +22,22 @@ export default function useComments() {
 
     const [comments, dispatchComments] = useReducer(commentsReducer, []); //aprašytas state
 
+    const [com, setCom] = useState(null);
+    const revertSmiles = content => {
+        C.smiles.forEach(s => {
+            content = value.replace(s[0], s[1])
+        })
+        return content;
+
+    }
+
+    useEffect(_ => {
+        if (com === null) {
+            return
+        }
+        axios.post(C.SERVER_URL + 'comments/create' + com.postID, { content: revertSmiles(com.content) }, { withCredentials: true })
+    }, [com])
+
     const getCommentsFromServer = postID => {
         axios.get(C.SERVER_URL + 'comments/for-post/' + postID, { withCredentials: true })
             .then(res => {

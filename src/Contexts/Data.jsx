@@ -9,14 +9,14 @@ export const DataProvider = ({ children }) => {
 
     const { users, dispatchUsers } = useUsers();
     const { posts, dispatchPosts, setPostUpdate } = usePosts();
-    const { comments, dispatchComments, getCommentsFromServer } = useComments();
+    const { comments, dispatchComments, getCommentsFromServer, setCom } = useComments();
 
 
     return (
         <Data.Provider value={{
             users, dispatchUsers,
             posts, dispatchPosts, setPostUpdate,
-            comments, dispatchComments, getCommentsFromServer
+            comments, dispatchComments, getCommentsFromServer, setCom
 
         }}>
             {children}

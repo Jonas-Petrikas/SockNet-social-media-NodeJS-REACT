@@ -288,8 +288,10 @@ app.post('/posts/update/:id', (req, res) => {
 app.get('/comments/for-post/:id', (req, res) => {
     const postID = req.params.id;
     const sql = `
-SELECT *
-FROM comments
+SELECT c.id, c.created_at, c.content, u.name
+FROM comments AS c
+INNER JOIN users AS u
+ON c.user_id = u.id
 WHERE post_id = ?
 `;
 
