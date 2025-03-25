@@ -14,7 +14,7 @@ export default function usePosts() {
         if (null === postUpdate) {
             return;
         }
-        axios.get(C.SERVER_URL + 'posts/update/' + postUpdate.id, {
+        axios.post(C.SERVER_URL + 'posts/update/' + postUpdate.id, {
             type: postUpdate.type,
             payload: postUpdate.payload
         }, { withCredentials: true })

@@ -8,7 +8,6 @@ export default function useUsers() {
 
 
     const [users, dispatchUsers] = useReducer(usersReducer, null); //aprašytas state
-    console.log('use users', 'users:', users?.length)
 
     useEffect(_ => {
         axios.get(C.SERVER_URL + 'users/active-list')

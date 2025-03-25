@@ -5,7 +5,7 @@ import * as A from '../../Constants/actions.js';
 
 export default function PostInList({ post }) {
 
-    const { dispatchPosts, setPostUpdate } = useContext(Data);
+    const { dispatchPosts, setPostUpdate, getCommentsFromServer } = useContext(Data);
     const { user } = useContext(Auth);
 
     const voteCounter = _ => {
@@ -37,6 +37,11 @@ export default function PostInList({ post }) {
         });
 
     }
+
+    const getComments = _ => {
+        getCommentsFromServer(post.id);
+    };
+
     const downVote = _ => {
         if (!user.id) {
             return;
@@ -71,15 +76,21 @@ export default function PostInList({ post }) {
             <div className="posts-list__post__content">
                 {post.content}
             </div>
-            <div className="posts-list__post__counter">
-                <div className="up" onClick={upVote} style={{ color: userVote('up') }}>⬆</div>
-                <div className="count">{voteCounter()}</div>
-                <div className="down" onClick={downVote} style={{ color: userVote('down') }}>⬇</div>
+            <div className="posts-list__post__bottom">
+                <div className="posts-list__post__bottom__counter">
+                    <div className="up" onClick={upVote} style={{ color: userVote('up') }}>⬆</div>
+                    <div className="count">{voteCounter()}</div>
+                    <div className="down" onClick={downVote} style={{ color: userVote('down') }}>⬇</div>
+                </div>
+                <div className="posts-list__post__bottom__show-comments">
+                    <span onClick={getComments}>show comments
+                    </span>
+                </div>
             </div>
 
 
 
 
         </li >
-    );
-}
+    )
+};

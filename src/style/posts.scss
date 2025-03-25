@@ -59,6 +59,50 @@
             }
         }
 
+        &__bottom {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            &__show-comments {
+                font-size: 18px;
+                color: red;
+                cursor: pointer;
+                transition: all 0.3s;
+
+                &:hover {
+                    transform: translate(-3px, 0);
+                }
+            }
+
+            &__counter {
+                background-color: v.$blue;
+                color: v.$white;
+                font-size: 20px;
+                display: flex;
+                height: 50px;
+                border-radius: 25px;
+                margin-top: 20px;
+
+                .up,
+                .down {
+                    padding: 0px 20px;
+                    display: flex;
+                    align-items: center;
+                    cursor: pointer;
+                }
+
+                .count {
+                    width: 50px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+            }
+
+        }
+
         &__counter {
             background-color: v.$blue;
             color: v.$white;
