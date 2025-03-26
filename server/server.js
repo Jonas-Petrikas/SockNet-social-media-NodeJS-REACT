@@ -1,16 +1,16 @@
-import express, { json, text } from 'express';
+import express from 'express';
 import mysql from 'mysql';
 import cors from 'cors';
 import md5 from 'md5';
 import cookieParser from 'cookie-parser';
 import { v4 } from 'uuid';
 
-const postsPerPage = 7;
+const postsPerPage = 11;
 
 const app = express();
 const port = 3333;
 const frontURL = 'http://localhost:5173';
-const serverURL = `http://localhost:${port}/`;
+const serverUrl = `http://localhost:${port}/`;
 
 app.use(cookieParser());
 
@@ -23,12 +23,14 @@ app.use(cors(
 
 app.use(express.json());
 
+
 const con = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',
     database: 'sock_net'
 });
+
 
 con.connect(err => {
     if (err) {
@@ -40,32 +42,31 @@ con.connect(err => {
 
 const error500 = (res, err) => res.status(500).json(err);
 const error400 = (res, customCode = 0) => res.status(400).json({
-    msg: { type: 'error', text: 'invalid request. Code' + customCode }
+    msg: { type: 'error', text: 'Invalid request. Code: ' + customCode }
 });
-
 const error401 = (res, message) => res.status(401).json({
     msg: { type: 'error', text: message }
 });
 
-//Identifikacija - pagal numatytą ID identifikuojam vartotoją pvz Ragana-su-šluota
-//Autorizacija - pagal vartotojo identifikuotą ID, vartotojui suteikiamos teisės - gali balsuoti, pirkti, keisti, etc.
-//Autentifikacija - pagal numatytą ID autentifikuojam vartotoją, pvz Arvydas Kijakauskas, a/k 55555555
+// Identifikacija - pagal numatytą ID identifikuojam vartototoją pvz Ragana-su-šluota
+// Autorizacija - pagal vartotojo identifikuotą ID, vartotojui suteikiamos teisės pvz gali balsuoti, pirkti cigaretes
+// Autentifikacija - pagal numatytą ID autentifikuojam vartotoją pvz Arvydas Kijakauskas a/k 55555555555
+
+
 
 // auth middleware
 app.use((req, res, next) => {
     const token = req.cookies['sock-net-token'] || 'no-token';
-
     const sql = `
-    SELECT u.id, u.role, u.name
-    FROM sessions AS s
-    INNER JOIN users AS u
-    ON s.user_id = u.id
-    WHERE token = ?
-    `
-
-
+        SELECT u.id, u.role, u.name
+        FROM sessions AS s
+        INNER JOIN users AS u
+        ON s.user_id = u.id
+        WHERE token = ?
+    `;
     con.query(sql, [token], (err, result) => {
         if (err) return error500(res, err);
+
         if (result.length === 0) {
             req.user = {
                 role: 'guest',
@@ -83,33 +84,27 @@ app.use((req, res, next) => {
     });
 });
 
-
-
-
-
 app.post('/login', (req, res) => {
     const { name, password } = req.body;
     const sql = 'SELECT * FROM users WHERE name = ? AND password = ?';
     con.query(sql, [name, md5(password)], (err, result) => {
         if (err) return error500(res, err);
         if (result.length === 0) {
-            error401(res, 'invalid username or password');
+            error401(res, 'Invalid user name or password');
             return;
         }
+
         const token = md5(v4());
         const userId = result[0].id;
         let time = new Date();
-
         time = time.setMinutes(time.getMinutes() + (60 * 24));
         time = new Date(time);
 
         const insertSql = `
-        INSERT INTO sessions
-        (user_id, token, valid_until)
-        VALUES (?, ?, ?)
-
-        `
-
+            INSERT INTO sessions
+            (user_id, token, valid_until)
+            VALUES (?, ?, ?)
+        `;
         con.query(insertSql, [userId, token, time], (err) => {
             if (err) return error500(res, err);
             res.cookie('sock-net-token', token, { httpOnly: true, SameSite: 'none' });
@@ -126,7 +121,7 @@ app.post('/login', (req, res) => {
 });
 
 
-//TODO paimti iš middleware
+//TODO paimti is middleware
 app.get('/auth-user', (req, res) => {
     setTimeout(_ => {
         res.json(req.user);
@@ -139,17 +134,14 @@ app.post('/logout', (req, res) => {
         const token = req.cookies['sock-net-token'] || 'no-token';
 
         const sql = `
-        DELETE FROM sessions
-        WHERE token = ?
+            DELETE FROM sessions
+            WHERE token = ?
         `
         con.query(sql, [token], (err) => {
-            if (err) {
-                res.status(500).send('Klaida bandant atsijungti');
-                return;
-            } //patrumpint
+            if (err) return error500(res, err);
             res.clearCookie('sock-net-token');
             res.status(200).json({
-                msg: { type: 'success', text: 'bye bye' },
+                msg: { type: 'success', text: `Bye bye!` },
                 user: {
                     role: 'guest',
                     name: 'Guest',
@@ -163,91 +155,96 @@ app.post('/logout', (req, res) => {
 
 
 
+// USERS/***** */
 
-
-
-//USERS
 app.get('/users/active-list', (req, res) => {
 
-    const sql = `
-    SELECT id, name, avatar, role, online
-    FROM users
-    -- WHERE role <> 'bot'
-    ORDER BY online DESC, name
+    setTimeout(_ => {
+
+        const sql = `
+        SELECT id, name, avatar, role AS userRole, online
+        FROM users
+        -- WHERE role = 'gold'
+        ORDER BY online DESC, name
     `;
 
-    //  
-    //   WHERE role = 'gold'
-    con.query(sql, (err, result) => {
-        if (err) return error500(res, err);
-        res.json({
-            success: true,
-            db: result
+        con.query(sql, (err, result) => {
+            if (err) return error500(res, err);
+            res.json({
+                success: true,
+                db: result
+            });
         });
-    });
+
+    }, 2000);
 });
 
-//POSTS
+
+// POSTS/***** */
+
 app.get('/posts/load-posts/:page', (req, res) => {
     const page = parseInt(req.params.page);
 
-    const sql = `
-   SELECT p.id, p.content, p.created_at AS postDate, p.votes, u.name, u.avatar, i.url AS mainImage
-    FROM posts AS p
-    INNER JOIN users AS u
-    ON u.id = p.user_id
-    INNER JOIN images AS i
-    ON p.id = i.post_id AND i.main = 1
-    ORDER BY p.created_at DESC
-    LIMIT ? OFFSET ?
+    setTimeout(_ => {
+
+        const sql = `
+        SELECT p.id, p.content, p.created_at AS postDate, p.votes, u.name, u.avatar, i.url AS mainImage
+        FROM posts AS p
+        INNER JOIN users AS u
+        ON u.id = p.user_id
+        INNER JOIN images AS i
+        ON p.id = i.post_id AND i.main = 1
+        ORDER BY p.created_at DESC
+        LIMIT ? OFFSET ?
     `;
 
+        con.query(sql, [postsPerPage, (page - 1) * postsPerPage], (err, result) => {
+            if (err) return error500(res, err);
 
+            result = result.map(r => ({ ...r, votes: JSON.parse(r.votes) }));
 
-    con.query(sql, [postsPerPage, (page - 1) * postsPerPage], (err, result) => {
-        if (err) return error500(res, err);
-        result = result.map(r => ({ ...r, votes: JSON.parse(r.votes) }));
-        res.json({
-            success: true,
-            db: result
+            res.json({
+                success: true,
+                db: result
+            });
+
         });
-    });
+
+    }, 1500);
 });
 
+
 app.post('/posts/update/:id', (req, res) => {
+
     if (!req.user.id) {
         error401(res, 'Please login first.');
         return;
     }
-    const postID = parseInt(req.params.id); //post id
+
+    const postID = parseInt(req.params.id); // postID
     const { type, payload } = req.body;
 
     const sql1 = 'SELECT * FROM posts WHERE id = ?';
-
     con.query(sql1, [postID], (err, result1) => {
         if (err) return error500(res, err);
-        if (!result1.length) return error400(res, 554); //554 random code number with no meaning
+        if (!result1.length) return error400(res, 554); // 554 is lubu paimtas
 
         if ('up_vote' === type || 'down_vote' === type) {
+
             const votes = JSON.parse(result1[0].votes);
             const up = new Set(votes.l);
             const down = new Set(votes.d);
             const userID = req.user.id; //userID
 
             if ('up_vote' === type) {
-
-
-
                 if (up.has(userID)) {
                     up.delete(userID);
-                } else if (up.has(userID)) {
+                } else if (down.has(userID)) {
                     down.delete(userID);
                     up.add(userID);
                 } else {
                     up.add(userID);
                 }
-
-
             }
             if ('down_vote' === type) {
                 if (down.has(userID)) {
@@ -258,42 +255,41 @@ app.post('/posts/update/:id', (req, res) => {
                 } else {
                     down.add(userID);
                 }
-
             }
             let newVotes = { l: [...up], d: [...down] };
             newVotes = JSON.stringify(newVotes);
-
             const sql2 = `
-            UPDATE posts
-            SET votes = ?
-            WHERE id = ?
+                UPDATE posts
+                SET votes = ?
+                WHERE id = ?
             `;
             con.query(sql2, [newVotes, postID], (err) => {
                 if (err) return error500(res, err);
                 res.status(200).json({
-                    msg: { type: 'sucess', text: 'you are the best, thanks for vote' }
+                    msg: { type: 'success', text: `Thank you for your vote. You are the best!` },
                 });
                 return;
-
-            })
+            });
         }
+
     });
-
-
-
 });
 
-//COMMENTS
+
+// COMMENTS/***** */
 
 app.get('/comments/for-post/:id', (req, res) => {
+
     const postID = req.params.id;
+
     const sql = `
-SELECT c.id, c.created_at, c.content, u.name
-FROM comments AS c
-INNER JOIN users AS u
-ON c.user_id = u.id
-WHERE post_id = ?
-`;
+        SELECT c.id, c.created_at, c.content, u.name
+        FROM comments AS c
+        INNER JOIN users AS u
+        ON c.user_id = u.id
+        WHERE c.post_id = ?
+        ORDER BY c.id DESC
+    `;
 
     con.query(sql, [postID], (err, result) => {
         if (err) return error500(res, err);
@@ -306,6 +302,38 @@ WHERE post_id = ?
     });
 
 });
+
+app.post('/comments/create/:id', (req, res) => {
+
+    if (!req.user.id) {
+        error401(res, 'Please login first.');
+        return;
+    }
+
+    const postID = req.params.id;
+    const userID = req.user.id;
+    const content = req.body.content; // maybe validate
+
+    const sql = `
+        INSERT INTO comments
+        (post_id, user_id, content)
+        VALUES (?, ?, ?)
+    `;
+
+    con.query(sql, [postID, userID, content], (err, result) => {
+        if (err) return error500(res, err);
+
+        res.json({
+            success: true,
+            id: result.insertId
+        });
+
+    });
+
+
+});
+
+
 
 // Start server
 

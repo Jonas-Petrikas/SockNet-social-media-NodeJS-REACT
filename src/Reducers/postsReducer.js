@@ -1,5 +1,6 @@
 
-import * as A from '../Constants/actions'
+import * as A from '../Constants/actions';
+
 
 export default function postsReducer(state, action) {
 
@@ -30,8 +31,7 @@ export default function postsReducer(state, action) {
                 } else {
                     down.add(id);
                 }
-
-                const post = newState.find(p => p.id === action.payload.post.id)
+                const post = newState.find(p => p.id === action.payload.post.id);
                 post.votes.l = [...up];
                 post.votes.d = [...down];
                 break;
@@ -47,14 +47,13 @@ export default function postsReducer(state, action) {
                 const id = action.payload.user.id;
                 if (up.has(id)) {
                     up.delete(id);
-                } else if (up.has(id)) {
+                } else if (down.has(id)) {
                     down.delete(id);
                     up.add(id);
                 } else {
                     up.add(id);
                 }
-
-                const post = newState.find(p => p.id === action.payload.post.id)
+                const post = newState.find(p => p.id === action.payload.post.id);
                 post.votes.l = [...up];
                 post.votes.d = [...down];
                 break;

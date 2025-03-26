@@ -6,10 +6,14 @@ import * as C from '../../Constants/main.js';
 import CommentInPostList from './CommentInPostList.jsx';
 
 export default function PostInList({ post }) {
-    const { dispatchPosts, setPostUpdate, getCommentsFromServer, comments, dispatchComments } = useContext(Data);
+    const { dispatchPosts, setPostUpdate, getCommentsFromServer, comments, dispatchComments, setCom } = useContext(Data);
     const { user } = useContext(Auth);
     const [showComments, setShowComments] = useState(false);
     const [comment, setComment] = useState('');
+
+    // let commentsNumber = comments === null ? '' : comments;
+
+    // console.log(commentsNumber);
 
     const voteCounter = _ => {
         return post.votes.l.length - post.votes.d.length;
@@ -22,7 +26,7 @@ export default function PostInList({ post }) {
         if (type === 'up') {
             return post.votes.l.includes(user.id) ? '#ffd700' : null;
         }
-        return post.votes.d.includes(user.id) ? '#ffd700' : null;
+        return post.votes.d.includes(user.id) ? '#e01b1b' : null;
     }
 
     const upVote = _ => {
@@ -39,44 +43,6 @@ export default function PostInList({ post }) {
         });
     }
 
-    const getComments = _ => {
-        if (!showComments) {
-            if (!comments.some(c => c.id === post.id)) {
-                getCommentsFromServer(post.id);
-                setShowComments(s => !s);
-
-            } else {
-                dispatchComments({
-                    type: A.SHOW_POST_COMMENTS,
-                    payload: {
-                        postID: post.id
-                    }
-                });
-                setShowComments(s => !s)
-
-            }
-
-        } else {
-            dispatchComments({
-                type: A.HIDE_POST_COMMENTS,
-                payload: {
-                    postID: post.id
-                }
-            });
-            setShowComments(s => !s)
-        }
-
-    };
-
-    const handleComment = e => {
-        let value = e.target.value;
-        C.smiles.forEach(s => {
-            value = value.replace(s[0], s[1])
-        })
-        setComment(value);
-
-    }
-
     const downVote = _ => {
         if (!user.id) {
             return;
@@ -90,6 +56,57 @@ export default function PostInList({ post }) {
             payload: { user, post }
         });
     }
+
+    const getComments = _ => {
+        if (!showComments) {
+            if (!comments.some(c => c.id === post.id && c.type === 'server')) {
+                getCommentsFromServer(post.id);
+            } else {
+                dispatchComments({
+                    type: A.SHOW_POST_COMMENTS,
+                    payload: {
+                        postID: post.id
+                    }
+                });
+            }
+            setShowComments(s => !s);
+        } else {
+            dispatchComments({
+                type: A.HIDE_POST_COMMENTS,
+                payload: {
+                    postID: post.id
+                }
+            });
+            setShowComments(s => !s);
+        }
+
+    }
+
+
+    const handleComment = e => {
+        let value = e.target.value;
+        C.smiles.forEach(s => {
+            value = value.replace(s[0], s[1]);
+        });
+        setComment(value);
+    }
+
+    const addNewComment = _ => {
+        dispatchComments({
+            type: A.ADD_POST_COMMENT,
+            payload: {
+                postID: post.id,
+                userName: user.name,
+                content: comment
+            }
+        });
+        setComment('');
+        setCom({
+            postID: post.id,
+            content: comment
+        });
+    }
+
 
     return (
         <li className="posts-list__post">
@@ -118,18 +135,28 @@ export default function PostInList({ post }) {
             </div>
             <div className="posts-list__post__write-comment">
                 <textarea onChange={handleComment} value={comment}></textarea>
-                <button>Send</button>
-
+                <button type="button" onClick={addNewComment}>Send</button>
             </div>
+
             {
-                comments.some(p => p.id === post.id && p.show) && (
-                    <div className="posts-list__post__bottom__comments">
-                        {
-                            comments.find(p => p.id === post.id).c
-                                .map(comment => <CommentInPostList key={comment.id} comment={comment} />)
-                        }
-                    </div>
-                )
+                comments.some(p => p.id === post.id) &&
+                <div className="posts-list__post__comments">
+                    {
+                        comments.find(p => p.id === post.id).c
+                            .map(comment => typeof comment.id === 'number' ? null : <CommentInPostList key={comment.id} comment={comment} />)
+                    }
+                </div>
+            }
+
+
+            {
+                comments.some(p => p.id === post.id && p.show) &&
+                <div className="posts-list__post__comments">
+                    {
+                        comments.find(p => p.id === post.id).c
+                            .map(comment => typeof comment.id === 'string' ? null : <CommentInPostList key={comment.id} comment={comment} />)
+                    }
+                </div>
             }
         </li>
     )
