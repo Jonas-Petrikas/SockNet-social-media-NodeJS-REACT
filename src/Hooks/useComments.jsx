@@ -64,7 +64,19 @@ export default function useComments() {
             })
     }
 
+    const deleteCommentsFromServer = (commentID, admin = false) => {
 
-    return { comments, dispatchComments, getCommentsFromServer, setCom }
+        const url = admin ? 'admin/comments/delete/' : 'comments/delete/';
+        axios.post(C.SERVER_URL + url + commentID, {}, { withCredentials: true })
+            .then(res => {
+                console.log(res.data)
+            })
+            .catch(error => {
+                console.log(error)
+            });
+    }
+
+
+    return { comments, dispatchComments, getCommentsFromServer, setCom, deleteCommentsFromServer }
 
 }

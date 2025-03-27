@@ -10,6 +10,7 @@ import Login from './Pages/Login';
 import Logout from './Pages/Logout';
 import { DataProvider } from './Contexts/Data';
 import { AuthProvider } from './Contexts/Auth';
+import NewPost from './Pages/NewPost';
 
 
 function App() {
@@ -22,12 +23,13 @@ function App() {
           <Routes>
 
             <Route index element={<Home />} />
+            <Route path='new-post' element={<NewPost />} />
             <Route path='chat' element={<Chat />} />
             <Route path='login' element={<Login />} />
             <Route path='logout' element={<Logout />} />
             <Route path='*' element={<Page404 />} />
 
-            labas
+
           </Routes>
         </Body>
       </DataProvider>

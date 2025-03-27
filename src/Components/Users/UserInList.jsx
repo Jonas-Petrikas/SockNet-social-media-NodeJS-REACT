@@ -1,16 +1,21 @@
 export default function UserInList({ user }) {
+
+    console.log(user);
     const makeColor = _ => {
-        if (user.role !== 'gold') {
-            if (user.online) {
+        if (user.online) {
+            if (user.userRole !== 'gold') {
+                if (user.userRole === 'admin') {
+                    return 'IndianRed';
+                }
                 return 'forestgreen';
             }
-            return 'grey';
+            return 'gold';
         }
-        return 'gold';
+        return 'grey';
     }
     return (
         <li className="users-list__user">
-            <div className="users-list__user__role">[{user.role}]</div>
+            <div className="users-list__user__role">[{user.userRole}]</div>
             <div className="users-list__user__name" style={{
                 color: makeColor()
             }}>{user.name} </div>

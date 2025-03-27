@@ -1,4 +1,39 @@
-export default function CommentInPostList({ comment }) {
+import { useContext } from "react"
+import Auth from "../../Contexts/Auth";
+import Data from "../../Contexts/Data";
+import * as A from '../../Constants/actions'
+
+export default function CommentInPostList({ comment, post }) {
+
+    const { user } = useContext(Auth);
+    const { dispatchComments, deleteCommentsFromServer } = useContext(Data);
+
+    const deleteComment = _ => {
+        dispatchComments({
+            type: A.DELETE_POST_COMMENT,
+            payload: {
+                commentID: comment.id,
+                postID: post.id
+
+
+            }
+        });
+        deleteCommentsFromServer(comment.id);
+    }
+
+    const deleteCommentAdmin = _ => {
+        dispatchComments({
+            type: A.DELETE_POST_COMMENT,
+            payload: {
+                commentID: comment.id,
+                postID: post.id
+
+
+            }
+        });
+        deleteCommentsFromServer(comment.id, true);
+    }
+
 
     return (
         <div className="posts-list__post__comments__comment">
@@ -10,6 +45,21 @@ export default function CommentInPostList({ comment }) {
                 {comment.content}
 
             </div>
+            {
+                user.id === comment.userID &&
+                <div className="post-list__post__comments__comment__delete">
+                    <button type='button' onClick={deleteComment}>delete</button>
+                </div>
+
+            }
+            {
+                user.role === 'admin' &&
+                <div className="post-list__post__comments__comment__admin-delete">
+                    <button type='button' onClick={deleteCommentAdmin}>admin-delete</button>
+                </div>
+
+            }
+
         </div>
 
     )

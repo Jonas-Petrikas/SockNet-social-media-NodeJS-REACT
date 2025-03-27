@@ -80,6 +80,17 @@ app.use((req, res, next) => {
                 id: result[0].id
             }
         }
+
+        console.log(req.path);
+        const regex = /\/admin\/.*/g;
+        const find = req.path.search(regex);
+        if (find !== -1) {
+            if ('admin' !== result[0].role) {
+                error401(res, 'Please login as Admin');
+                return;
+            }
+        }
+
         next();
     });
 });
@@ -283,7 +294,7 @@ app.get('/comments/for-post/:id', (req, res) => {
     const postID = req.params.id;
 
     const sql = `
-        SELECT c.id, c.created_at, c.content, u.name
+        SELECT c.id, c.created_at, c.content, u.name, u.id as userID
         FROM comments AS c
         INNER JOIN users AS u
         ON c.user_id = u.id
@@ -332,6 +343,64 @@ app.post('/comments/create/:id', (req, res) => {
 
 
 });
+
+app.post('/comments/delete/:id', (req, res) => {
+    if (!req.user.id) {
+        error401(res, 'Please login first.');
+        return;
+    }
+
+    const commentID = req.params.id;
+    const userID = req.user.id;
+
+    const sql = `
+    DELETE FROM comments
+    WHERE id = ? AND user_id = ?
+    `;
+
+    con.query(sql, [commentID, userID], (err, result) => {
+        if (err) return error500(res, err);
+
+        console.log(result);
+
+        res.json({
+            success: !!result.affectedRows
+
+        });
+
+    });
+
+
+
+});
+
+//BACK OFFICE
+
+app.post('/admin/comments/delete/:id', (req, res) => {
+
+    const commentID = req.params.id;
+
+    const sql = `
+    DELETE FROM comments
+    WHERE id = ?
+    `;
+
+    con.query(sql, [commentID], (err, result) => {
+        if (err) return error500(res, err);
+
+        console.log(result);
+
+        res.json({
+            success: !!result.affectedRows
+
+        });
+
+    });
+
+
+
+});
+
 
 
 

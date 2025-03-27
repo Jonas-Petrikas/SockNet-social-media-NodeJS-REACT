@@ -144,6 +144,34 @@
                 padding: 15px;
                 border-radius: 10px;
 
+                &__admin-delete {
+                    button {
+                        background-color: v.$white;
+                        color: v.$red;
+                        font-family: v.$ibm;
+                        font-size: 18px;
+                        padding: 7px 21px;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        border: 2px solid v.$red;
+                        transition: all 0.3s ease-in-out;
+                    }
+                }
+
+                button {
+                    background-color: v.$red;
+                    color: v.$white;
+                    font-family: v.$ibm;
+                    font-size: 18px;
+                    padding: 7px 21px;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    border: none;
+                    transition: all 0.3s ease-in-out;
+                }
+
+
+
                 &__top {
                     width: 100%;
                     display: flex;
