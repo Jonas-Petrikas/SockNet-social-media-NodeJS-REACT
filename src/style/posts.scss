@@ -158,16 +158,18 @@
                     }
                 }
 
-                button {
-                    background-color: v.$red;
-                    color: v.$white;
-                    font-family: v.$ibm;
-                    font-size: 18px;
-                    padding: 7px 21px;
-                    border-radius: 20px;
-                    cursor: pointer;
-                    border: none;
-                    transition: all 0.3s ease-in-out;
+                &__delete {
+                    button {
+                        background-color: v.$red;
+                        color: v.$white;
+                        font-family: v.$ibm;
+                        font-size: 18px;
+                        padding: 7px 21px;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        border: none;
+                        transition: all 0.3s ease-in-out;
+                    }
                 }
 
 

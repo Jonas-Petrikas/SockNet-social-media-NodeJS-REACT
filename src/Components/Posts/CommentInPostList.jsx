@@ -41,21 +41,21 @@ export default function CommentInPostList({ comment, post }) {
                 <span className="posts-list__post__comments__comment__top__name">{comment.name} </span>
                 <span className="posts-list__post__comments__comment__top__date">{comment.created_at.split('T')[0]} </span>
             </div>
-            <div className="post-list__post__comments__comment__content">
+            <div className="posts-list__post__comments__comment__content">
                 {comment.content}
 
             </div>
             {
                 user.id === comment.userID &&
-                <div className="post-list__post__comments__comment__delete">
+                <div className="posts-list__post__comments__comment__delete">
                     <button type='button' onClick={deleteComment}>delete</button>
                 </div>
 
             }
             {
                 user.role === 'admin' &&
-                <div className="post-list__post__comments__comment__admin-delete">
-                    <button type='button' onClick={deleteCommentAdmin}>admin-delete</button>
+                <div className="posts-list__post__comments__comment__admin-delete">
+                    <button type='button' onClick={deleteCommentAdmin}>💪 admin-delete</button>
                 </div>
 
             }
