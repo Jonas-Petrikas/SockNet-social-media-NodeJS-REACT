@@ -1,6 +1,6 @@
 export default function UserInList({ user }) {
 
-    console.log(user);
+
     const makeColor = _ => {
         if (user.online) {
             if (user.userRole !== 'gold') {

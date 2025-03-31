@@ -81,7 +81,6 @@ app.use((req, res, next) => {
             }
         }
 
-        console.log(req.path);
         const regex = /\/admin\/.*/g;
         const find = req.path.search(regex);
         if (find !== -1) {
