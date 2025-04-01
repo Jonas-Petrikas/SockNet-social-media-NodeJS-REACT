@@ -8,7 +8,7 @@ const Data = createContext();
 export const DataProvider = ({ children }) => {
 
     const { users, dispatchUsers } = useUsers();
-    const { posts, dispatchPosts, setPostUpdate } = usePosts();
+    const { posts, dispatchPosts, setPostUpdate, setStorePost } = usePosts();
     const { comments, dispatchComments, getCommentsFromServer, setCom, deleteCommentsFromServer } = useComments();
 
 
@@ -17,7 +17,7 @@ export const DataProvider = ({ children }) => {
             users, dispatchUsers,
             posts, dispatchPosts, setPostUpdate,
             comments, dispatchComments, getCommentsFromServer, setCom,
-            deleteCommentsFromServer
+            deleteCommentsFromServer, setStorePost
 
         }}>
             {children}

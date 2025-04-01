@@ -9,6 +9,19 @@ export default function usePosts() {
 
     const [posts, dispatchPosts] = useReducer(postsReducer, null); //aprašytas state
     const [postUpdate, setPostUpdate] = useState(null);
+    const [storePost, setStorePost] = useState(null);
+
+    useEffect(_ => {
+        if (null === storePost) {
+            return;
+        }
+        axios.post(C.SERVER_URL + 'posts/new', storePost, { withCredentials: true })
+            .then(res => {
+                console.log(res.data);
+            }).catch(error => {
+                console.log(error)
+            });
+    })
 
     useEffect(_ => {
         if (null === postUpdate) {
@@ -41,7 +54,7 @@ export default function usePosts() {
             });
     }, []);
 
-    return { posts, dispatchPosts, setPostUpdate }
+    return { posts, dispatchPosts, setPostUpdate, storePost, setStorePost }
 
 
 }
