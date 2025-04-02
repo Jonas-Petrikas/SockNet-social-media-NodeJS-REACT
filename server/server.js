@@ -86,7 +86,7 @@ const saveImageAsFile = imageBase64String => {
 app.use((req, res, next) => {
     const token = req.cookies['sock-net-token'] || 'no-token';
     const sql = `
-        SELECT u.id, u.role, u.name
+        SELECT u.id, u.role, u.name, u.avatar
         FROM sessions AS s
         INNER JOIN users AS u
         ON s.user_id = u.id
@@ -99,13 +99,15 @@ app.use((req, res, next) => {
             req.user = {
                 role: 'guest',
                 name: 'Guest',
-                id: 0
+                id: 0,
+                avatar: null
             }
         } else {
             req.user = {
                 role: result[0].role,
                 name: result[0].name,
-                id: result[0].id
+                id: result[0].id,
+                avatar: result[0].avatar
             }
         }
 
@@ -151,7 +153,8 @@ app.post('/login', (req, res) => {
                 user: {
                     role: result[0].role,
                     name: result[0].name,
-                    id: result[0].id
+                    id: result[0].id,
+                    avatar: result[0].avatar
                 }
             });
         });
@@ -183,7 +186,8 @@ app.post('/logout', (req, res) => {
                 user: {
                     role: 'guest',
                     name: 'Guest',
-                    id: 0
+                    id: 0,
+                    avatar: null
                 }
             });
         });
@@ -267,6 +271,10 @@ app.post('/posts/update/:id', (req, res) => {
     }
 
     const postID = parseInt(req.params.id); // postID
+    if (isNaN(postID)) {
+        error401(res, '87128 Invalid post ID');
+        return;
+    }
     const { type, payload } = req.body;
 
     const sql1 = 'SELECT * FROM posts WHERE id = ?';
@@ -322,11 +330,13 @@ app.post('/posts/update/:id', (req, res) => {
 
 
 app.post('/posts/new', (req, res) => {
+
     const content = req.body.text;
     const created_at = new Date();
     const updated_at = new Date();
     const votes = JSON.stringify({ l: [], d: [] });
     const user_id = req.user.id;
+    const uuid = req.body.uuid;
 
     const sql1 = `
     INSERT INTO posts
@@ -363,6 +373,7 @@ app.post('/posts/new', (req, res) => {
 
             res.json({
                 id: postID,
+                uuid,
                 success: true,
                 msg: {
                     type: 'success',
