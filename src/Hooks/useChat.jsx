@@ -17,13 +17,39 @@ export default function useChat() {
             ]
         messages: 
             [
-                {id}
+                {id, [
+                {text, time, id, type: "read"|"write" },
+                {text, time, id, type: "read"|"write" },
+                {text, time, id, type: "read"|"write" }
+                ]},
+                {id, [{messages}]},
+                {id, [{messages}]},
+
 
             ]
         }
     */
 
     const [chat, dispatchChat] = useReducer(chatReducer, null); //aprašytas state
+
+    const getChatMessages = userID => {
+        axios.get(C.SERVER_URL + 'chat/chat-with/' + userID, { withCredentials: true })
+            .then(res => {
+                console.log(res.data);
+                dispatchChat(
+                    {
+                        type: A.LOAD_CHAT_MESSAGES,
+                        payload: {
+                            chatWith: userID,
+                            messages: res.data.messages
+                        }
+                    }
+                )
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
 
     useEffect(_ => {
         axios.get(C.SERVER_URL + 'chat/list', { withCredentials: true })
@@ -42,5 +68,5 @@ export default function useChat() {
 
     }, [])
 
-    return { chat, dispatchChat }
+    return { chat, dispatchChat, getChatMessages }
 }

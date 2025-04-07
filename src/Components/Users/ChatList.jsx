@@ -3,7 +3,7 @@ import { ChatData } from "../../Pages/Chat";
 
 export default function ChatList() {
 
-    const { chat, dispatchChat } = useContext(ChatData);
+    const { chat, dispatchChat, showChat, setShowChat } = useContext(ChatData);
 
     console.log(chat);
 
@@ -15,9 +15,9 @@ export default function ChatList() {
                     chat && chat.chatList.map(user =>
                         <li key={user.id} className="chat-list__user">
                             <div className="chat-list__user__avatar">
-                                <img src={user.avatar}></img>
+                                <img src={user.avatar} alt={user.name}></img>
                             </div>
-                            <div className="chat-list__user__name">
+                            <div className="chat-list__user__name" onClick={_ => setShowChat(user)}>
                                 {user.name}
                             </div>
                         </li>
